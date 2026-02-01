@@ -1,0 +1,79 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Company {
+  companyId Int    @id @default(autoincrement())
+  name      String @unique
+  users     User[]
+
+  @@map(name: "company")
+}
+
+model User {
+  userId    Int        @id @default(autoincrement())
+  company   Company    @relation(fields: [companyId], references: [companyId])
+  companyId Int
+  firstName String
+  lastName  String
+  email     String
+  role      UserRole
+  taskLists TaskList[]
+  team      Team       @relation(fields: [teamId], references: [teamId])
+  teamId    Int
+
+  @@map(name: "user")
+}
+
+model Team {
+  teamId  Int    @id @default(autoincrement())
+  name    String @unique
+  members User[]
+
+  @@map(name: "team")
+}
+
+model TaskList {
+  taskListId   Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [userId])
+  userId       Int
+  taskListDate DateTime @db.Date
+  tasks        Task[]
+
+  @@map(name: "task_list")
+}
+
+model Task {
+  taskId        Int        @id @default(autoincrement())
+  taskList      TaskList   @relation(fields: [taskListId], references: [taskListId])
+  taskListId    Int
+  title         String
+  notes         String?
+  status        TaskStatus @default(PENDING)
+  private       Boolean
+  hoursEstimate Int?
+
+  @@map(name: "task")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+  NEED_HELP
+}
+
+enum UserRole {
+  DEVELOPER
+  MANAGER
+  COMPANY_ADMIN
+  ADMIN
+}
