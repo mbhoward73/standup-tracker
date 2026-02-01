@@ -4,17 +4,17 @@ import {
 	getCurrentTaskListDatesFormatted,
 	formatDate
 } from '../utils/date.js'
+import { getTeam } from './team.js'
 import peach from 'p-each-series'
+import pmap from 'p-map'
+import flatten from 'lodash.flatten'
 
-//find all current user task lists and create new task lists if necessary
+//find user task lists for yesterday/today/tomorrow and create new task lists if any are missing
 export async function getUserTaskLists(userId) {
 	const taskLists = await fetchUserTaskLists(userId)
 	if (taskLists.length === 3) {
-		console.log('found 3 task lists so returning')
 		return taskLists
 	}
-
-	console.log(`some task lists are missing ${JSON.stringify(taskLists)}`)
 
 	//create any missing taskLists - it's a little strange this happens as part of query operation
 	//but just trying to simplify the implementation for now
@@ -32,10 +32,18 @@ export async function getUserTaskLists(userId) {
 	return await fetchUserTaskLists(userId)
 }
 
+export async function getTeamTaskLists(teamId) {
+	const team = await getTeam(teamId)
+	const taskLists = await pmap(team.members, user =>
+		getUserTaskLists(user.userId)
+	)
+	return flatten(taskLists)
+}
+
 async function fetchUserTaskLists(userId) {
 	return prisma.taskList.findMany({
 		where: {
-			userId: parseInt(userId),
+			userId: userId,
 			taskListDate: {
 				in: getCurrentTaskListDates()
 			}
@@ -56,7 +64,7 @@ async function fetchUserTaskLists(userId) {
 export async function createTaskList(userId, taskListDate) {
 	return prisma.taskList.create({
 		data: {
-			userId: parseInt(userId),
+			userId,
 			taskListDate
 		},
 		include: {
