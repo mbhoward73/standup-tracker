@@ -37,12 +37,14 @@ export const typeDefs = gql`
 
 	type Team {
 		teamId: ID!
+		company: Company!
 		name: String!
 		members: [User!]!
 	}
 
 	type TaskList {
 		taskListId: ID!
+		company: Company!
 		user: User!
 		taskListDate: Date!
 		tasks: [Task!]!
@@ -50,6 +52,8 @@ export const typeDefs = gql`
 
 	type Task {
 		taskId: ID!
+		company: Company!
+		user: User!
 		taskList: TaskList!
 		title: String!
 		notes: String
@@ -65,6 +69,7 @@ export const typeDefs = gql`
 	}
 
 	type Mutation {
+		login(email: String!, password: String!): String!
 		createTask(task: taskInput!): Task!
 		updateTask(taskId: ID!, task: taskInput!): Task!
 		deleteTask(taskId: ID!): ID!

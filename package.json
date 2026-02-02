@@ -7,7 +7,9 @@
 	"scripts": {
 		"migrate:db": "npx prisma migrate dev --name \"init\"",
 		"start:server": "nodemon server/server.js",
-		"seed:db": "npx prisma db seed"
+		"seed:db": "npx prisma db seed",
+		"start:web": "cd standup-web && npm start",
+		"prisma:studio": "npx prisma studio"
 	},
 	"keywords": [],
 	"author": "",
@@ -16,11 +18,15 @@
 	"dependencies": {
 		"@apollo/server": "^5.3.0",
 		"@as-integrations/express4": "^1.1.2",
+		"@casl/ability": "^6.8.0",
+		"@casl/prisma": "^1.6.1",
 		"@prisma/client": "^6.19.2",
+		"bcryptjs": "^3.0.3",
 		"cors": "^2.8.6",
 		"express": "^4.22.1",
 		"graphql": "^16.12.0",
 		"graphql-tag": "^2.12.6",
+		"jsonwebtoken": "^9.0.3",
 		"lodash.flatten": "^4.4.0",
 		"p-each-series": "^3.0.0",
 		"p-map": "^7.0.4"

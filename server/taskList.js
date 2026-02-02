@@ -10,7 +10,7 @@ import pmap from 'p-map'
 import flatten from 'lodash.flatten'
 
 //find user task lists for yesterday/today/tomorrow and create new task lists if any are missing
-export async function getUserTaskLists(userId) {
+export async function getUserTaskLists(companyId, userId) {
 	const taskLists = await fetchUserTaskLists(userId)
 	if (taskLists.length === 3) {
 		return taskLists
@@ -25,17 +25,17 @@ export async function getUserTaskLists(userId) {
 
 	await peach(getCurrentTaskListDatesFormatted(), async expectedDate => {
 		if (!foundDates.includes(expectedDate)) {
-			await createTaskList(userId, new Date(expectedDate))
+			await createTaskList(companyId, userId, new Date(expectedDate))
 		}
 	})
 
 	return await fetchUserTaskLists(userId)
 }
 
-export async function getTeamTaskLists(teamId) {
+export async function getTeamTaskLists(companyId, teamId) {
 	const team = await getTeam(teamId)
 	const taskLists = await pmap(team.members, user =>
-		getUserTaskLists(user.userId)
+		getUserTaskLists(companyId, user.userId)
 	)
 	return flatten(taskLists)
 }
@@ -43,7 +43,7 @@ export async function getTeamTaskLists(teamId) {
 async function fetchUserTaskLists(userId) {
 	return prisma.taskList.findMany({
 		where: {
-			userId: userId,
+			userId,
 			taskListDate: {
 				in: getCurrentTaskListDates()
 			}
@@ -55,19 +55,22 @@ async function fetchUserTaskLists(userId) {
 			}
 		],
 		include: {
+            company: true,
 			user: true,
 			tasks: true
 		}
 	})
 }
 
-export async function createTaskList(userId, taskListDate) {
+export async function createTaskList(companyId, userId, taskListDate) {
 	return prisma.taskList.create({
 		data: {
+            companyId,
 			userId,
 			taskListDate
 		},
 		include: {
+            company: true,
 			user: true,
 			tasks: true
 		}

@@ -1,9 +1,11 @@
 import { prisma } from '../prisma/database.js'
 
-export async function createTask(task) {
+export async function createTask(companyId, userId, task) {
 	const { title, notes, status, hoursEstimate } = task
 	return prisma.task.create({
 		data: {
+			companyId,
+			userId,
 			title,
 			notes,
 			status,
@@ -16,7 +18,9 @@ export async function createTask(task) {
 			}
 		},
 		include: {
-			taskList: true
+			taskList: true,
+			company: true,
+			user: true
 		}
 	})
 }
@@ -35,6 +39,8 @@ export async function updateTask(taskId, task) {
 			hoursEstimate
 		},
 		include: {
+			company: true,
+			user: true,
 			taskList: true
 		}
 	})
@@ -44,5 +50,5 @@ export async function deleteTask(taskId) {
 	await prisma.task.delete({
 		where: { taskId }
 	})
-    return taskId
+	return taskId
 }
