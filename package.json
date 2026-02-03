@@ -28,6 +28,8 @@
 		"graphql-tag": "^2.12.6",
 		"jsonwebtoken": "^9.0.3",
 		"lodash.flatten": "^4.4.0",
+		"lodash.isempty": "^4.4.0",
+		"lodash.pick": "^4.4.0",
 		"p-each-series": "^3.0.0",
 		"p-map": "^7.0.4"
 	},

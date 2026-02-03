@@ -46,6 +46,7 @@ export const typeDefs = gql`
 		taskListId: ID!
 		company: Company!
 		user: User!
+		team: Team!
 		taskListDate: Date!
 		tasks: [Task!]!
 	}
@@ -54,11 +55,12 @@ export const typeDefs = gql`
 		taskId: ID!
 		company: Company!
 		user: User!
+		team: Team!
 		taskList: TaskList!
 		title: String!
 		notes: String
 		status: TaskStatus!
-		private: Boolean!
+		private: Boolean
 		hoursEstimate: Int
 	}
 
@@ -73,6 +75,7 @@ export const typeDefs = gql`
 		createTask(task: taskInput!): Task!
 		updateTask(taskId: ID!, task: taskInput!): Task!
 		deleteTask(taskId: ID!): ID!
+		updateTeam(teamId: ID!, team: teamInput!): Team!
 	}
 
 	input taskInput {
@@ -82,5 +85,9 @@ export const typeDefs = gql`
 		status: TaskStatus!
 		private: Boolean!
 		hoursEstimate: Int
+	}
+
+	input teamInput {
+		name: String!
 	}
 `

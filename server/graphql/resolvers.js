@@ -3,44 +3,58 @@ import { dateScalar } from './customScalars.js'
 import { getUserTaskLists, getTeamTaskLists } from '../taskList.js'
 import { getUser } from '../user.js'
 import { createTask, updateTask, deleteTask } from '../task.js'
+import { updateTeam } from '../team.js'
 import { login } from '../login.js'
+import { forbidden } from '../error.js'
 
-//TODO: add authorization
 //TODO: add validation - what happens when invalid arguments are passed in (eg. arg ids not found)
 const Query = {
 	user: async (parent, args, context) => {
-		return getUser(parseInt(args.userId))
+		console.log(`context: ${JSON.stringify(context)}`)
+		const { companyId } = context.userData
+		const userId = parseInt(args.userId)
+		return getUser(companyId, userId, context.ability)
 	},
 	userTaskLists: async (parent, args, context) => {
-		return getUserTaskLists(
-			parseInt(context.userData.companyId),
-			parseInt(args.userId)
-		)
+		const { companyId, teamId } = context.userData
+		const userId = parseInt(args.userId)
+		return getUserTaskLists(companyId, userId, teamId, context.ability)
 	},
 	teamTaskLists: async (parent, args, context) => {
-		return getTeamTaskLists(
-			parseInt(context.userData.companyId),
-			parseInt(args.teamId)
-		)
+		const { companyId } = context.userData
+		const teamId = parseInt(args.teamId)
+		return getTeamTaskLists(companyId, teamId, context.ability)
 	}
 }
 
 const Mutation = {
 	login: async (parent, args, context) => {
-		return login(args.email, args.password)
+		const { email, password } = args
+		return login(email, password)
 	},
 	createTask: (parent, args, context) => {
-		return createTask(
-			parseInt(context.userData.companyId),
-			parseInt(context.userData.userId),
-			args.task
-		)
+		const { companyId, userId, teamId } = context.userData
+		const task = args.task
+		return createTask(companyId, userId, teamId, task, context.ability)
 	},
 	updateTask: (parent, args, context) => {
-		return updateTask(parseInt(args.taskId), args.task)
+		const taskId = parseInt(args.taskId)
+		const task = args.task
+		return updateTask(taskId, task, context.ability)
 	},
 	deleteTask: (parent, args, context) => {
-		return deleteTask(parseInt(args.taskId))
+		const taskId = parseInt(args.taskId)
+		return deleteTask(taskId, context.ability)
+	},
+	updateTeam: (parent, args, context) => {
+		const ability = context.ability
+		if (!ability.can('update', 'Team')) {
+			forbidden()
+		}
+
+		const teamId = parseInt(args.teamId)
+		const team = args.team
+		return updateTeam(teamId, team, context.ability)
 	}
 }
 

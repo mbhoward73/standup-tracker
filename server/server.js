@@ -7,6 +7,7 @@ import cors from 'cors'
 import { typeDefs } from './graphql/schema.js'
 import { resolvers } from './graphql/resolvers.js'
 import jwt from 'jsonwebtoken'
+import { defineAbilitiesFor } from './abilities.js'
 
 const app = express()
 const httpServer = http.createServer(app)
@@ -44,54 +45,34 @@ app.use(
 			console.log(`token without bearer: ${tokenWithoutBearer}`)
 			console.log(`JWT_SECRET is ${process.env.JWT_SECRET}`)
 
-			// try {
-			// 	console.log('about to verify token')
-			// 	const decoded = await jwt.verify(token, process.env.JWT_SECRET)
+			return jwt.verify(
+				tokenWithoutBearer,
+				process.env.JWT_SECRET,
+				(err, decoded) => {
+					console.log(`inside jwt.verify`)
+					if (err) {
+						return res.status(401).json({ message: 'Invalid or expired token' })
+					}
 
-			// 	console.log(`decoded token: ${JSON.stringify(decoded)}`)
-			// 	const { userId, companyId, role } = decoded
+					console.log(`decoded token: ${JSON.stringify(decoded)}`)
+					const { userId, companyId, teamId, role } = decoded
 
-			// 	if (!userId || !companyId || !role) {
-			// 		throw new AuthenticationError('Unauthorized')
-			// 	}
+					if (!userId || !companyId || !role) {
+						throw new AuthenticationError('Unauthorized')
+					}
 
-			// 	const userData = {
-			// 		userId,
-			// 		companyId,
-			// 		role
-			// 	}
+					const userData = {
+						userId,
+						companyId,
+						teamId,
+						role
+					}
 
-			// 	console.log(`userData: ${JSON.stringify(userData)}`)
-			// 	req.user = userData
-			// 	next()
-			// } catch (error) {
-			// 	return res.status(401).json({ message: 'Invalid or expired token' })
-			// }
-
-			jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET, (err, decoded) => {
-				console.log(`inside jwt.verify`)
-				if (err) {
-					return res.status(401).json({ message: 'Invalid or expired token' })
+					console.log(`userData: ${JSON.stringify(userData)}`)
+					const ability = defineAbilitiesFor(userData)
+					return { userData, ability }
 				}
-
-				console.log(`decoded token: ${JSON.stringify(decoded)}`)
-				const { userId, companyId, role } = decoded
-
-				if (!userId || !companyId || !role) {
-					throw new AuthenticationError('Unauthorized')
-				}
-
-				const userData = {
-					userId,
-					companyId,
-					role
-				}
-
-				console.log(`userData: ${JSON.stringify(userData)}`)
-                //ste req.user?
-
-				return userData
-			})
+			)
 		}
 	})
 )

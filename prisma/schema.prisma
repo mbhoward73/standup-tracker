@@ -36,11 +36,13 @@ model User {
 }
 
 model Team {
-  teamId    Int     @id @default(autoincrement())
-  company   Company @relation(fields: [companyId], references: [companyId])
+  teamId    Int        @id @default(autoincrement())
+  company   Company    @relation(fields: [companyId], references: [companyId])
   companyId Int
-  name      String  @unique
+  name      String     @unique
   members   User[]
+  taskLists TaskList[]
+  tasks     Task[]
 
   @@map(name: "team")
 }
@@ -51,6 +53,8 @@ model TaskList {
   companyId    Int
   user         User     @relation(fields: [userId], references: [userId])
   userId       Int
+  team         Team     @relation(fields: [teamId], references: [teamId])
+  teamId       Int
   taskListDate DateTime @db.Date
   tasks        Task[]
 
@@ -65,6 +69,8 @@ model Task {
   taskListId    Int
   user          User       @relation(fields: [userId], references: [userId])
   userId        Int
+  team          Team       @relation(fields: [teamId], references: [teamId])
+  teamId        Int
   title         String
   notes         String?
   status        TaskStatus @default(PENDING)

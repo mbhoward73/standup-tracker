@@ -1,5 +1,6 @@
 import { prisma } from '../prisma/database.js'
 import bcrypt from 'bcryptjs'
+import peach from 'p-each-series'
 
 async function seedDatabase() {
 	const company1 = await prisma.company.create({
@@ -40,14 +41,11 @@ async function seedDatabase() {
 			role: 'DEVELOPER',
 			team: {
 				connect: { teamId: team1.teamId }
-			},
-			taskLists: {
-				create: getTaskListSeedData(company1)
 			}
 		}
 	})
 
-    // await prisma.taskList
+	await createTaskLists(developer1)
 
 	const password2 = await hashPassword('steve')
 
@@ -63,12 +61,11 @@ async function seedDatabase() {
 			role: 'DEVELOPER',
 			team: {
 				connect: { teamId: team1.teamId }
-			},
-			taskLists: {
-				create: getTaskListSeedData(company1)
 			}
 		}
 	})
+
+	await createTaskLists(developer2)
 
 	const password3 = await hashPassword('matt')
 
@@ -84,12 +81,11 @@ async function seedDatabase() {
 			role: 'MANAGER',
 			team: {
 				connect: { teamId: team1.teamId }
-			},
-			taskLists: {
-				create: getTaskListSeedData(company1)
 			}
 		}
 	})
+
+	await createTaskLists(manager)
 
 	const password4 = await hashPassword('andy')
 
@@ -110,54 +106,50 @@ async function seedDatabase() {
 	})
 }
 
-//TODO: pick up here
-//TODO: change this to async peach and crate task lists with call to prisma.taskList.create
-//TODO: need to connect company, user
-//TODO: after successful seed sanity test data with prisma studio
-//TODO: re-test all queries with postman
-//TODO: re-test front-end
-//TODO: continue with back-end casl implementation
-//TODO: move to front-end casl implementation
-//TODO: implement error handling and query validation
+async function createTaskLists(user) {
+	const currentDate = new Date('2026-02-01')
 
-function getTaskListSeedData(company, user) {
-	const currentDate = new Date('2026-01-25')
-	const numDays = 10
-	const taskLists = []
-	for (let i = 0; i < numDays; i++) {
-		const taskList = {
-			taskListDate: new Date(currentDate),
-			company: {
-				connect: { companyId: company.companyId }
-			},
-			user: {
-				connect: { userId: user.userId }
-			},
-			tasks: {
-				create: getTasksSeedData(company, user, 3)
+	await peach([...Array(10).keys()], async i => {
+		await prisma.taskList.create({
+			data: {
+				company: {
+					connect: { companyId: user.companyId }
+				},
+				user: {
+					connect: { userId: user.userId }
+				},
+				team: {
+					connect: { teamId: user.teamId }
+				},
+				taskListDate: new Date(currentDate),
+				tasks: {
+					create: getTasksSeedData(user, 3)
+				}
 			}
-		}
-		taskLists.push(taskList)
+		})
+
 		currentDate.setDate(currentDate.getDate() + 1)
-	}
-	return taskLists
+	})
 }
 
-function getTasksSeedData(company, user, numTasks) {
+function getTasksSeedData(user, numTasks) {
 	const tasks = []
 	for (let i = 0; i < numTasks; i++) {
-		tasks.push(getTaskSeedData(company, user))
+		tasks.push(getTaskSeedData(user))
 	}
 	return tasks
 }
 
-function getTaskSeedData(company, user) {
+function getTaskSeedData(user) {
 	return {
 		company: {
-			connect: { companyId: company.companyId }
+			connect: { companyId: user.companyId }
 		},
 		user: {
 			connect: { userId: user.userId }
+		},
+		team: {
+			connect: { teamId: user.teamId }
 		},
 		title: `Task #${getRandomInt(1000)}`,
 		status: getRandomTaskStatus(),
