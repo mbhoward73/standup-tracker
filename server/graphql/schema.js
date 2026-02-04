@@ -44,6 +44,9 @@ export const typeDefs = gql`
 
 	type TaskList {
 		taskListId: ID!
+		companyId: ID!
+		userId: ID!
+		teamId: ID!
 		company: Company!
 		user: User!
 		team: Team!
@@ -53,6 +56,10 @@ export const typeDefs = gql`
 
 	type Task {
 		taskId: ID!
+		userId: ID!
+		companyId: ID!
+		taskListId: ID!
+		teamId: ID!
 		company: Company!
 		user: User!
 		team: Team!

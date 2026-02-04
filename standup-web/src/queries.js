@@ -17,6 +17,9 @@ export const GET_USER = gql`
 			taskLists {
 				taskListId
 				taskListDate
+				companyId
+				userId
+				teamId
 				user {
 					userId
 					firstName
@@ -28,6 +31,11 @@ export const GET_USER = gql`
 					status
 					private
 					hoursEstimate
+					userId
+					companyId
+					taskId
+					taskListId
+					teamId
 				}
 			}
 		}

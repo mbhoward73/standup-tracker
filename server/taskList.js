@@ -22,7 +22,6 @@ export async function getUserTaskLists(companyId, userId, teamId, ability) {
 	)
 	const taskLists = await fetchUserTaskLists(userId, ability)
 	if (taskLists.length === 3) {
-		console.log('returning 3 task lists')
 		return taskLists
 	}
 
@@ -49,7 +48,6 @@ export async function getUserTaskLists(companyId, userId, teamId, ability) {
 }
 
 export async function getTeamTaskLists(companyId, teamId, ability) {
-	console.log('inside get team task lists')
 	const team = await getTeam(teamId, ability)
 	const taskLists = await pmap(team.members, user =>
 		getUserTaskLists(companyId, user.userId, teamId, ability)
@@ -60,7 +58,6 @@ export async function getTeamTaskLists(companyId, teamId, ability) {
 async function fetchUserTaskLists(userId, ability) {
 	const currentTaskListDates = getCurrentTaskListDates()
 	console.log(`currentTaskListDates: ${JSON.stringify(currentTaskListDates)}`)
-	console.log(`ability: ${JSON.stringify(ability)}`)
 	const fetchedTaskLists = await prisma.taskList.findMany({
 		where: {
 			AND: [
@@ -86,12 +83,23 @@ async function fetchUserTaskLists(userId, ability) {
 			tasks: true
 		}
 	})
-	console.log('about to check fields')
 
-	const TASK_FIELDS = ['title', 'notes', 'status', 'private', 'hoursEstimate']
+	const TASK_FIELDS = [
+		'title',
+		'notes',
+		'status',
+		'private',
+		'hoursEstimate',
+		'taskId',
+		'companyId',
+		'taskListId',
+		'userId',
+		'teamId'
+	]
 	const options = { fieldsFrom: rule => rule.fields || TASK_FIELDS }
 
 	return fetchedTaskLists.map(taskList => {
+		console.log(`tasks before sanitization ${JSON.stringify(taskList.tasks)}`)
 		const sanitizedTasks = taskList.tasks.map(task => {
 			const permittedTaskFields = permittedFieldsOf(
 				ability,

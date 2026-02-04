@@ -10,7 +10,6 @@ import { forbidden } from '../error.js'
 //TODO: add validation - what happens when invalid arguments are passed in (eg. arg ids not found)
 const Query = {
 	user: async (parent, args, context) => {
-		console.log(`context: ${JSON.stringify(context)}`)
 		const { companyId } = context.userData
 		const userId = parseInt(args.userId)
 		return getUser(companyId, userId, context.ability)
@@ -21,8 +20,11 @@ const Query = {
 		return getUserTaskLists(companyId, userId, teamId, context.ability)
 	},
 	teamTaskLists: async (parent, args, context) => {
-		const { companyId } = context.userData
+		const { companyId, userId, role } = context.userData
 		const teamId = parseInt(args.teamId)
+		if (!ability.can('update', 'Team')) {
+			forbidden()
+		}
 		return getTeamTaskLists(companyId, teamId, context.ability)
 	}
 }

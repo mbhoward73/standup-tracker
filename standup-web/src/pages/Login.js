@@ -1,6 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.js'
+import {
+	Container,
+	Box,
+	Button,
+	TextField,
+	Typography,
+	Paper
+} from '@mui/material'
 
 const Login = () => {
 	const navigate = useNavigate()
@@ -12,13 +20,8 @@ const Login = () => {
 
 	const handleSubmit = async event => {
 		event.preventDefault()
-		const formData = {
-			email: event.target.email.value,
-			password: event.target.password.value
-		}
-		console.log(`email: ${email} - password: ${password}`)
-		if (formData.email && formData.password) {
-			const success = await login(formData.email, formData.password)
+		if (email && password) {
+			const success = await login(email, password)
 			if (success) {
 				navigate(from, { replace: true })
 			} else {
@@ -30,33 +33,51 @@ const Login = () => {
 	}
 
 	return (
-		<form onSubmit={handleSubmit}>
-			<h2>Login</h2>
-			<div>
-				<label htmlFor="email">Email:</label>
-				<input
-					id="email"
-					type="email"
-					value={email}
-					onChange={e => setEmail(e.target.value)}
-					required
-				/>
-			</div>
-			<div>
-				<label htmlFor="password">Password:</label>
-				<input
-					id="password"
-					type="password"
-					value={password}
-					onChange={e => setPassword(e.target.value)}
-					required
-				/>
-			</div>
-			<button type="submit" disabled={loading}>
-				{loading ? 'Logging in...' : 'Login'}
-			</button>
-			{error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
-		</form>
+		<Container maxWidth="md">
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				minHeight="100vh">
+				<Paper elevation={3} sx={{ p: 4, width: 360 }}>
+					<Typography variant="h5" mb={2} align="center">
+						Stand-up Tracker Login
+					</Typography>
+
+					<Box component="form" onSubmit={handleSubmit}>
+						<TextField
+							label="Email"
+							type="email"
+							fullWidth
+							required
+							margin="normal"
+							value={email}
+							onChange={e => setEmail(e.target.value)}
+						/>
+
+						<TextField
+							label="Password"
+							type="password"
+							fullWidth
+							required
+							margin="normal"
+							value={password}
+							onChange={e => setPassword(e.target.value)}
+						/>
+
+						<Button
+							type="submit"
+							variant="contained"
+							fullWidth
+							sx={{ mt: 2 }}
+							disabled={loading}>
+							{loading ? 'Logging in...' : 'Login'}
+						</Button>
+						{error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
+					</Box>
+				</Paper>
+			</Box>
+		</Container>
 	)
 }
 

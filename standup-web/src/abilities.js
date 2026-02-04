@@ -1,3 +1,5 @@
+//TODO: this file is duplicated from server as a temporary shortcut
+//TODO: need to replace with a call to server to fetch these abilities upon login
 import { AbilityBuilder } from '@casl/ability'
 import { createPrismaAbility } from '@casl/prisma'
 
