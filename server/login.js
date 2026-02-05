@@ -13,7 +13,6 @@ export async function login(email, password) {
 	if (!valid) {
 		throw new Error('invalid user/password')
 	}
-	console.log('password is valid so generating token')
 	//generate jwt and return
 	const JWT_SECRET = process.env.JWT_SECRET
 	const { userId, companyId, role, teamId } = user

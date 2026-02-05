@@ -6,6 +6,7 @@ import { createTask, updateTask, deleteTask } from '../task.js'
 import { updateTeam } from '../team.js'
 import { login } from '../login.js'
 import { forbidden } from '../error.js'
+import { DateTimeResolver } from 'graphql-scalars'
 
 //TODO: add validation - what happens when invalid arguments are passed in (eg. arg ids not found)
 const Query = {
@@ -25,7 +26,7 @@ const Query = {
 		if (!ability.can('update', 'Team')) {
 			forbidden()
 		}
-		return getTeamTaskLists(companyId, teamId, context.ability)
+		return getTeamTaskLists(companyId, teamId, userId, context.ability)
 	}
 }
 
@@ -60,4 +61,9 @@ const Mutation = {
 	}
 }
 
-export const resolvers = { Date: dateScalar, Query, Mutation }
+export const resolvers = {
+	Date: dateScalar,
+	DateTime: DateTimeResolver,
+	Query,
+	Mutation
+}

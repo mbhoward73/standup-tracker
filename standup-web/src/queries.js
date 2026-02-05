@@ -36,6 +36,7 @@ export const GET_USER = gql`
 					taskId
 					taskListId
 					teamId
+                    createdAt
 				}
 			}
 		}

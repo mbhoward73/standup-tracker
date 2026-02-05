@@ -17,9 +17,6 @@ import { subject } from '@casl/ability'
 
 //find user task lists for yesterday/today/tomorrow and create new task lists if any are missing
 export async function getUserTaskLists(companyId, userId, teamId, ability) {
-	console.log(
-		`getting user tasks lists for company ${companyId} and user ${userId}`
-	)
 	const taskLists = await fetchUserTaskLists(userId, ability)
 	if (taskLists.length === 3) {
 		return taskLists
@@ -47,17 +44,24 @@ export async function getUserTaskLists(companyId, userId, teamId, ability) {
 	return await fetchUserTaskLists(userId, ability)
 }
 
-export async function getTeamTaskLists(companyId, teamId, ability) {
+export async function getTeamTaskLists(companyId, teamId, managerId, ability) {
 	const team = await getTeam(teamId, ability)
 	const taskLists = await pmap(team.members, user =>
 		getUserTaskLists(companyId, user.userId, teamId, ability)
 	)
-	return flatten(taskLists)
+	//put manager's own task lists as front of list
+	const allTaskLists = flatten(taskLists)
+	const managerTaskLists = allTaskLists.filter(
+		taskList => taskList.userId === managerId
+	)
+	const reportTaskLists = allTaskLists.filter(
+		taskList => taskList.userId !== managerId
+	)
+	return managerTaskLists.concat(reportTaskLists)
 }
 
 async function fetchUserTaskLists(userId, ability) {
 	const currentTaskListDates = getCurrentTaskListDates()
-	console.log(`currentTaskListDates: ${JSON.stringify(currentTaskListDates)}`)
 	const fetchedTaskLists = await prisma.taskList.findMany({
 		where: {
 			AND: [
@@ -94,12 +98,12 @@ async function fetchUserTaskLists(userId, ability) {
 		'companyId',
 		'taskListId',
 		'userId',
-		'teamId'
+		'teamId',
+		'createdAt'
 	]
 	const options = { fieldsFrom: rule => rule.fields || TASK_FIELDS }
 
 	return fetchedTaskLists.map(taskList => {
-		console.log(`tasks before sanitization ${JSON.stringify(taskList.tasks)}`)
 		const sanitizedTasks = taskList.tasks.map(task => {
 			const permittedTaskFields = permittedFieldsOf(
 				ability,
@@ -107,10 +111,11 @@ async function fetchUserTaskLists(userId, ability) {
 				subject('Task', task),
 				options
 			)
-			console.log(`permittedFields: ${JSON.stringify(permittedTaskFields)}`)
 			return pick(task, permittedTaskFields)
 		})
-		taskList.tasks = sanitizedTasks.filter(task => !isEmpty(task))
+		taskList.tasks = sanitizedTasks
+			.filter(task => !isEmpty(task))
+			.sort((a, b) => b.createdAt - a.createdAt)
 		return taskList
 	})
 }
@@ -122,7 +127,9 @@ export async function createTaskList(
 	taskListDate,
 	ability
 ) {
-	if (!ability.can('create', 'TaskList', { companyId, userId, teamId })) {
+	if (
+		!ability.can('create', subject('TaskList', { companyId, userId, teamId }))
+	) {
 		forbidden()
 	}
 

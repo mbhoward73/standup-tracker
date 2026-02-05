@@ -2,7 +2,6 @@ import { AbilityBuilder } from '@casl/ability'
 import { createPrismaAbility } from '@casl/prisma'
 
 export function defineAbilitiesFor(user) {
-	console.log(`defining abilities for user ${JSON.stringify(user)}`)
 	const { can, cannot, build } = new AbilityBuilder(createPrismaAbility)
 
 	switch (user.role) {
@@ -46,7 +45,8 @@ export function defineAbilitiesFor(user) {
 					'companyId',
 					'taskListId',
 					'userId',
-					'teamId'
+					'teamId',
+					'createdAt'
 				],
 				{
 					companyId: user.companyId,

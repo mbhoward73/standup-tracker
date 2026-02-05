@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useMutation } from '@apollo/client/react'
 import {
 	Box,
 	TextField,
 	Typography,
 	Paper,
-	CircularProgress,
-	FormControl,
 	Select,
 	MenuItem,
 	FormControlLabel,
@@ -15,14 +14,10 @@ import {
 import { useAuth } from '../contexts/AuthContext.js'
 import { subject } from '@casl/ability'
 import { getCurrentDataClone } from '../utils.js'
+import { UPDATE_TASK_MUTATION, DELETE_TASK_MUTATION } from '../mutations.js'
+import pick from 'lodash.pick'
 
-const AUTO_SAVE_DELAY = 800
-
-//TODO: check manager view and make sure task lists are separated
-//TODO: hook up create and delete buttons (make sure new task is added to top of list)
-//TODO: hook up graphql mutations (create, update, delete)
-//TODO: test login as company admin  make sure it doesn't blow up with empty task lists
-//TODO: in manager view modify server so managers tasks are at top of list - or do it on client side?
+const AUTO_SAVE_DELAY = 2000
 
 const TASK_STATUS_KEYS = [
 	'PENDING',
@@ -32,35 +27,56 @@ const TASK_STATUS_KEYS = [
 	'NEED_HELP'
 ]
 
-const TaskForm = ({ currentData }) => {
+const TaskForm = ({ currentData, onDataRefresh }) => {
 	const [formData, setFormData] = useState({
+		taskId: currentData.taskId,
+		taskListId: currentData.taskListId,
 		title: currentData.title,
 		status: currentData.status,
-		notes: currentData.notes,
+		notes: currentData.notes || '',
 		private: currentData.private,
-		hoursEstimate: currentData.hoursEstimate
+		hoursEstimate: currentData.hoursEstimate || undefined
 	})
+	// console.log(
+	// 	`initializing task with title ${currentData.title} and createdAt ${currentData.createdAt}`
+	// )
 	const { ability } = useAuth()
 
-	const [status, setStatus] = useState('idle') // idle | saving | saved | error
 	const saveTimeout = useRef(null)
 	const isFirstRender = useRef(true)
 
-	const saveChanges = async data => {
-		setStatus('saving')
-
-		try {
-			// Simulate API call
-			await new Promise(resolve => setTimeout(resolve, 600))
-			// console.log('Saved:', data)
-
-			setStatus('saved')
-		} catch (err) {
-			setStatus('error')
-		}
-	}
+	const [updateTask] = useMutation(UPDATE_TASK_MUTATION)
+	const [deleteTask] = useMutation(DELETE_TASK_MUTATION)
 
 	useEffect(() => {
+		const saveChanges = async data => {
+			if (!data.title) {
+				return
+			}
+			try {
+				const taskInput = pick(data, [
+					'taskListId',
+					'title',
+					'notes',
+					'status',
+					'private',
+					'hoursEstimate'
+				])
+				taskInput.hoursEstimate = taskInput.hoursEstimate
+					? parseInt(taskInput.hoursEstimate)
+					: undefined
+
+				const result = await updateTask({
+					variables: { taskId: data.taskId, task: taskInput }
+				})
+				console.log(
+					`successfully updated task to ${JSON.stringify(result.data.updateTask)}`
+				)
+			} catch (e) {
+				console.log(e)
+			}
+		}
+
 		// Prevent auto-save on initial render
 		if (isFirstRender.current) {
 			isFirstRender.current = false
@@ -78,19 +94,31 @@ const TaskForm = ({ currentData }) => {
 		}, AUTO_SAVE_DELAY)
 
 		return () => clearTimeout(saveTimeout.current)
-	}, [formData])
+	}, [formData, updateTask])
 
 	const handleChange = field => e => {
 		const value =
-			typeof e.target.checked === 'boolean' ? e.target.checked : e.target.value
+			field === 'private' && typeof e.target.checked === 'boolean'
+				? e.target.checked
+				: e.target.value
 		setFormData(prev => ({
 			...prev,
 			[field]: value
 		}))
 	}
 
-	const handleDeleteTask = e => {
-		//delete task here
+	const handleDeleteTask = async e => {
+		try {
+			const result = await deleteTask({
+				variables: { taskId: formData.taskId }
+			})
+			console.log(
+				`successfully deleted task ${JSON.stringify(result.data.deleteTask)}`
+			)
+			await onDataRefresh()
+		} catch (e) {
+			console.log(e)
+		}
 	}
 
 	const FieldLabel = ({ children }) => (
@@ -112,6 +140,7 @@ const TaskForm = ({ currentData }) => {
 					<FieldLabel>Hours Estimate</FieldLabel>
 					<TextField
 						sx={{ width: 100 }}
+						type="number"
 						margin="none"
 						value={formData.hoursEstimate}
 						onChange={handleChange('hoursEstimate')}
@@ -221,27 +250,6 @@ const TaskForm = ({ currentData }) => {
 			</Box>
 
 			{getDeleteButtonRender(currentData, ability)}
-
-			{/* <Box mt={2} display="flex" alignItems="center" gap={1}>
-				{status === 'saving' && (
-					<>
-						<CircularProgress size={16} />
-						<Typography variant="body2">Saving…</Typography>
-					</>
-				)}
-
-				{status === 'saved' && (
-					<Typography variant="body2" color="success.main">
-						All changes saved
-					</Typography>
-				)}
-
-				{status === 'error' && (
-					<Typography variant="body2" color="error.main">
-						Error saving changes
-					</Typography>
-				)}
-			</Box> */}
 		</Paper>
 	)
 }

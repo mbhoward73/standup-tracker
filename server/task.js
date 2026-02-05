@@ -1,23 +1,36 @@
 import { prisma } from '../prisma/database.js'
 import { accessibleBy } from '@casl/prisma'
 import { forbidden } from './error.js'
+import { subject } from '@casl/ability'
 
 export async function createTask(companyId, userId, teamId, task, ability) {
-	if (!ability.can('create', 'Task', { companyId, userId, teamId })) {
+	if (!ability.can('create', subject('Task', { companyId, userId, teamId }))) {
 		forbidden()
 	}
 
 	const { title, notes, status, hoursEstimate } = task
 	return prisma.task.create({
 		data: {
-			companyId,
-			userId,
-			teamId,
 			title,
 			notes,
 			status,
 			private: task.private,
 			hoursEstimate,
+			company: {
+				connect: {
+					companyId: parseInt(companyId)
+				}
+			},
+			user: {
+				connect: {
+					userId: parseInt(userId)
+				}
+			},
+			team: {
+				connect: {
+					teamId: parseInt(teamId)
+				}
+			},
 			taskList: {
 				connect: {
 					taskListId: parseInt(task.taskListId)
@@ -36,8 +49,8 @@ export async function createTask(companyId, userId, teamId, task, ability) {
 export async function updateTask(taskId, task, ability) {
 	const { title, notes, status, hoursEstimate } = task
 
-	const existingTask = await prisma.team.findUnique({ where: { taskId } })
-	if (!ability.can('update', 'Task', existingTask)) {
+	const existingTask = await prisma.task.findUnique({ where: { taskId } })
+	if (!ability.can('update', subject('Task', existingTask))) {
 		forbidden()
 	}
 
@@ -62,8 +75,8 @@ export async function updateTask(taskId, task, ability) {
 }
 
 export async function deleteTask(taskId, ability) {
-	const existingTask = await prisma.team.findUnique({ where: { taskId } })
-	if (!ability.can('delete', 'Task', existingTask)) {
+	const existingTask = await prisma.task.findUnique({ where: { taskId } })
+	if (!ability.can('delete', subject('Task', existingTask))) {
 		forbidden()
 	}
 

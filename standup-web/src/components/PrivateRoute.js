@@ -3,7 +3,6 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.js'
 
 const PrivateRoute = () => {
-	console.log('inside PrivateRoute')
 	const { token, loading } = useAuth()
 	const location = useLocation()
 

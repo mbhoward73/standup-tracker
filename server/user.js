@@ -9,12 +9,17 @@ export async function getUser(companyId, userId, ability) {
 	if (!user) {
 		notFound('User not found')
 	}
+	//no support for these roles managing their own task lists currently
+	if (user.role === 'ADMIN' || user.role === 'COMPANY_ADMIN') {
+		user.taskLists = []
+		return user
+	}
+
 	const taskLists =
 		user.role === 'MANAGER'
-			? await getTeamTaskLists(companyId, user.teamId, ability)
+			? await getTeamTaskLists(companyId, user.teamId, user.userId, ability)
 			: await getUserTaskLists(companyId, userId, user.teamId, ability)
 	user.taskLists = taskLists
-	console.log(`returning user ${JSON.stringify(user)}`)
 	return user
 }
 

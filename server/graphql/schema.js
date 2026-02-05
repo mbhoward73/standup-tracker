@@ -17,6 +17,7 @@ export const typeDefs = gql`
 	}
 
 	scalar Date
+	scalar DateTime
 
 	type Company {
 		companyId: ID!
@@ -69,6 +70,7 @@ export const typeDefs = gql`
 		status: TaskStatus!
 		private: Boolean
 		hoursEstimate: Int
+		createdAt: DateTime!
 	}
 
 	type Query {
@@ -79,13 +81,13 @@ export const typeDefs = gql`
 
 	type Mutation {
 		login(email: String!, password: String!): String!
-		createTask(task: taskInput!): Task!
-		updateTask(taskId: ID!, task: taskInput!): Task!
+		createTask(task: TaskInput!): Task!
+		updateTask(taskId: ID!, task: TaskInput!): Task!
 		deleteTask(taskId: ID!): ID!
-		updateTeam(teamId: ID!, team: teamInput!): Team!
+		updateTeam(teamId: ID!, team: TeamInput!): Team!
 	}
 
-	input taskInput {
+	input TaskInput {
 		taskListId: ID!
 		title: String!
 		notes: String
@@ -94,7 +96,7 @@ export const typeDefs = gql`
 		hoursEstimate: Int
 	}
 
-	input teamInput {
+	input TeamInput {
 		name: String!
 	}
 `

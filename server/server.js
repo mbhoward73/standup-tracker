@@ -8,12 +8,13 @@ import { typeDefs } from './graphql/schema.js'
 import { resolvers } from './graphql/resolvers.js'
 import jwt from 'jsonwebtoken'
 import { defineAbilitiesFor } from './abilities.js'
+import { DateTimeTypeDefinition } from "graphql-scalars"
 
 const app = express()
 const httpServer = http.createServer(app)
 
 const server = new ApolloServer({
-	typeDefs,
+	typeDefs: [DateTimeTypeDefinition, typeDefs],
 	resolvers,
 	plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
 })
@@ -26,15 +27,12 @@ app.use(
 	express.json(),
 	expressMiddleware(server, {
 		context: async ({ req, res, next }) => {
-			console.log(`expressMiddleware operation name: ${req.body.operationName}`)
 			if (req.body.operationName === 'Login') {
 				console.log(`received Login so skipping auth check`)
 				return
 			}
 
-			console.log('fetching token')
 			const token = req.headers.authorization || ''
-			console.log(`token is ${token}`)
 
 			if (!token) {
 				console.log('did not find token')
@@ -42,19 +40,15 @@ app.use(
 			}
 
 			const tokenWithoutBearer = token.split(' ')[1]
-			console.log(`token without bearer: ${tokenWithoutBearer}`)
-			console.log(`JWT_SECRET is ${process.env.JWT_SECRET}`)
 
 			return jwt.verify(
 				tokenWithoutBearer,
 				process.env.JWT_SECRET,
 				(err, decoded) => {
-					console.log(`inside jwt.verify`)
 					if (err) {
 						return res.status(401).json({ message: 'Invalid or expired token' })
 					}
 
-					console.log(`decoded token: ${JSON.stringify(decoded)}`)
 					const { userId, companyId, teamId, role } = decoded
 
 					if (!userId || !companyId || !role) {
@@ -68,7 +62,6 @@ app.use(
 						role
 					}
 
-					console.log(`userData: ${JSON.stringify(userData)}`)
 					const ability = defineAbilitiesFor(userData)
 					return { userData, ability }
 				}

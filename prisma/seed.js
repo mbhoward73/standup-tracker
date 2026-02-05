@@ -107,7 +107,7 @@ async function seedDatabase() {
 }
 
 async function createTaskLists(user) {
-	const currentDate = new Date('2026-02-01')
+	const currentDate = new Date('2026-02-04')
 
 	await peach([...Array(10).keys()], async i => {
 		await prisma.taskList.create({
@@ -190,6 +190,10 @@ async function clearDatabase() {
 async function hashPassword(password) {
 	const salt = await bcrypt.genSalt(10)
 	return bcrypt.hash(password, salt)
+}
+
+async function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 try {

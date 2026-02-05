@@ -76,6 +76,7 @@ model Task {
   status        TaskStatus @default(PENDING)
   private       Boolean
   hoursEstimate Int?
+  createdAt DateTime @default(now())
 
   @@map(name: "task")
 }

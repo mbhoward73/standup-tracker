@@ -22,9 +22,6 @@ export const AuthProvider = ({ children }) => {
 			const { data } = await loginMutation({ variables: { email, password } })
 			const token = data.login
 			const decodedToken = jwtDecode(token)
-			console.log(
-				`Logged in successfully - decodedToken:${JSON.stringify(decodedToken)}`
-			)
 			setUser(decodedToken)
 			setToken(token)
 			setAbility(defineAbilitiesFor(decodedToken))
