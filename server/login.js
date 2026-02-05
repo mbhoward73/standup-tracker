@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/database.js'
+import { prisma } from './prisma/database.js'
 import bcrypt from 'bcryptjs'
 import { getUserByEmail } from './user.js'
 import jwt from 'jsonwebtoken'

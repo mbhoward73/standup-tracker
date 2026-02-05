@@ -14,6 +14,7 @@ model Company {
   teams     Team[]
   taskLists TaskList[]
   tasks     Task[]
+  auditLogs AuditLog[]
 
   @@map(name: "company")
 }
@@ -31,6 +32,7 @@ model User {
   team      Team       @relation(fields: [teamId], references: [teamId])
   teamId    Int
   tasks     Task[]
+  auditLogs AuditLog[]
 
   @@map(name: "user")
 }
@@ -76,9 +78,23 @@ model Task {
   status        TaskStatus @default(PENDING)
   private       Boolean
   hoursEstimate Int?
-  createdAt DateTime @default(now())
+  createdAt     DateTime   @default(now())
 
   @@map(name: "task")
+}
+
+model AuditLog {
+  auditLogId Int            @id @default(autoincrement())
+  company    Company        @relation(fields: [companyId], references: [companyId])
+  companyId  Int
+  user       User           @relation(fields: [userId], references: [userId])
+  userId     Int
+  action     AuditLogAction
+  target     AuditLogTarget
+  sourceIp   String
+  timestamp  DateTime       @default(now())
+
+  @@map(name: "audit_log")
 }
 
 enum TaskStatus {
@@ -94,4 +110,21 @@ enum UserRole {
   MANAGER
   COMPANY_ADMIN
   ADMIN
+}
+
+enum AuditLogAction {
+  READ
+  UPDATE
+  CREATE
+  DELETE
+  LOGIN
+  LOGOUT
+}
+
+enum AuditLogTarget {
+  COMPANY
+  USER
+  TEAM
+  TASK_LIST
+  TASK
 }

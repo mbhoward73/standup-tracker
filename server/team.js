@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/database.js'
+import { prisma } from './prisma/database.js'
 import { forbidden } from './error.js'
 import { accessibleBy } from '@casl/prisma'
 

@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/database.js'
+import { prisma } from './database.js'
 import bcrypt from 'bcryptjs'
 import peach from 'p-each-series'
 

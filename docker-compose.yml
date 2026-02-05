@@ -4,13 +4,39 @@ services:
     restart: always
     environment:
       POSTGRES_USER: db_username
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password 
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     secrets:
       - db_password
     volumes:
       - postgres:/var/lib/postgresql
     ports:
       - '5432:5432'
+  server:
+    build: ./server
+    container_name: standup-server
+    command: sh -c "npm run migrate:deploy && npm run seed:db && npm run start"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgres://db_username:db_password@postgres:5432/standup_db
+    ports:
+      - '4000:4000'
+    depends_on:
+      - postgres
+
+  client:
+    build: ./client
+    container_name: standup-client
+    command: npm run start
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    depends_on:
+      - server
+
 volumes:
   postgres:
 secrets:

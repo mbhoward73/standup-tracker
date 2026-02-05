@@ -1,9 +1,9 @@
-import { prisma } from '../prisma/database.js'
+import { prisma } from './prisma/database.js'
 import {
 	getCurrentTaskListDates,
 	getCurrentTaskListDatesFormatted,
 	formatDate
-} from '../utils/date.js'
+} from './utils/date.js'
 import { getTeam } from './team.js'
 import peach from 'p-each-series'
 import pmap from 'p-map'

@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/database.js'
+import { prisma } from './prisma/database.js'
 import { getUserTaskLists, getTeamTaskLists } from './taskList.js'
 import { notFound } from './error.js'
 import { accessibleBy } from '@casl/prisma'

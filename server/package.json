@@ -1,15 +1,17 @@
 {
-	"name": "standup-tracker",
+	"name": "standup-tracker-server",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
 		"migrate:db": "npx prisma migrate dev --name \"init\"",
-		"start:server": "nodemon server/server.js",
+		"migrate:deploy": "npx prisma migrate deploy",
+		"start:watch": "nodemon ./server.js",
+		"start": "node ./server.js",
 		"seed:db": "npx prisma db seed",
-		"start:web": "cd standup-web && npm start",
-		"prisma:studio": "npx prisma studio"
+		"prisma:studio": "npx prisma studio",
+		"generate:prisma": "npx prisma generate"
 	},
 	"keywords": [],
 	"author": "",

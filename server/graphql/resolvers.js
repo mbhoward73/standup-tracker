@@ -1,4 +1,4 @@
-import { prisma } from '../../prisma/database.js'
+import { prisma } from '../prisma/database.js'
 import { dateScalar } from './customScalars.js'
 import { getUserTaskLists, getTeamTaskLists } from '../taskList.js'
 import { getUser } from '../user.js'
@@ -27,6 +27,12 @@ const Query = {
 			forbidden()
 		}
 		return getTeamTaskLists(companyId, teamId, userId, context.ability)
+	},
+	auditLog: async (parent, args, context) => {
+		const ability = context.ability
+		if (!ability.can('read', 'AuditLog')) {
+			forbidden()
+		}
 	}
 }
 
