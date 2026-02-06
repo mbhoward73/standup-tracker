@@ -180,6 +180,7 @@ function getRandomTaskStatus() {
 }
 
 async function clearDatabase() {
+	await prisma.auditLog.deleteMany({})
 	await prisma.task.deleteMany({})
 	await prisma.taskList.deleteMany({})
 	await prisma.user.deleteMany({})
