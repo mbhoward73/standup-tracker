@@ -1,6 +1,6 @@
-import { prisma } from './prisma/database.js'
+import { prisma } from '../prisma/database.js'
 import { accessibleBy } from '@casl/prisma'
-import { forbidden } from './error.js'
+import { forbidden } from '../error.js'
 import { subject } from '@casl/ability'
 
 export async function createTask(companyId, userId, teamId, task, ability) {

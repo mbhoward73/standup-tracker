@@ -15,7 +15,7 @@ const AuditLog = () => {
 	const { loading, error, data } = useQuery(GET_AUDIT_LOG)
 
 	if (loading) return <div>Loading...</div>
-	if (error) return <div>Error fetching data.</div>
+	if (error) return <div>Error fetching data</div>
 
 	return (
 		<TableContainer component={Paper}>
