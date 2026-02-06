@@ -8,7 +8,8 @@ import { typeDefs } from './graphql/schema.js'
 import { resolvers } from './graphql/resolvers.js'
 import jwt from 'jsonwebtoken'
 import { defineAbilitiesFor } from './abilities.js'
-import { DateTimeTypeDefinition } from "graphql-scalars"
+import { DateTimeTypeDefinition } from 'graphql-scalars'
+import { writeAuditLogEntry } from './auditLog.js'
 
 const app = express()
 const httpServer = http.createServer(app)
@@ -19,6 +20,22 @@ const server = new ApolloServer({
 	plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
 })
 
+// const auditLogger = async (req, res, next) => {
+// 	console.log('inside auditLogger')
+// 	const { companyId, userId } = req.userData
+// 	const entry = {
+// 		companyId,
+// 		userId,
+// 		action: req.body.operationName,
+// 		sourceIp: req.ip
+// 	}
+
+// 	//TODO: change this to async so we don't hold up request
+// 	await writeAuditLogEntry(entry)
+
+// 	next()
+// }
+
 await server.start()
 
 app.use(
@@ -28,7 +45,6 @@ app.use(
 	expressMiddleware(server, {
 		context: async ({ req, res, next }) => {
 			if (req.body.operationName === 'Login') {
-				console.log(`received Login so skipping auth check`)
 				return
 			}
 
@@ -61,6 +77,17 @@ app.use(
 						teamId,
 						role
 					}
+
+					//TODO: also log graphql variables so we know what resource is being acted on
+					const entry = {
+						companyId: userData.companyId,
+						userId: userData.userId,
+						action: req.body.operationName,
+						sourceIp: req.ip
+					}
+
+					//don't wait for this to return so we don't hold up request
+					writeAuditLogEntry(entry)
 
 					const ability = defineAbilitiesFor(userData)
 					return { userData, ability }

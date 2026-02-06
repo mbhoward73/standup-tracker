@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import { Box } from '@mui/material'
+import AuditLog from '../components/AuditLog'
+import { subject } from '@casl/ability'
 
 function getUserNames(taskLists) {
 	return taskLists.reduce((acc, cur) => {
@@ -20,13 +22,47 @@ function getUserNames(taskLists) {
 }
 
 const Dashboard = () => {
-	const { user } = useAuth()
+	const { user, ability } = useAuth()
 	const { loading, error, data, refetch } = useQuery(GET_USER, {
 		variables: { userId: user.userId }
 	})
 
 	if (loading) return <div>Loading...</div>
 	if (error) return <div>Error fetching data.</div>
+
+	if (ability.can('read', subject('AuditLog', { companyId: user.companyId }))) {
+		return (
+			<Container maxWidth="xl">
+				<Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+					<Box sx={{ flex: 1 }} />
+
+					<Typography
+						variant="h3"
+						component="h1"
+						align="center"
+						gutterBottom
+						sx={{ my: 4, mx: 'auto' }}>
+						Stand-up Tracker
+					</Typography>
+
+					<Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+						<LogoutButton />
+					</Box>
+				</Box>
+				<Box>
+					<Typography
+						variant="h4"
+						component="h4"
+						align="center"
+						gutterBottom
+						sx={{ my: 4, mx: 4 }}>
+						Audit Log
+					</Typography>
+					<AuditLog />
+				</Box>
+			</Container>
+		)
+	}
 
 	if (data.user.taskLists.length === 0) {
 		return (

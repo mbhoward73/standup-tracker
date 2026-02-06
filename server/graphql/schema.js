@@ -16,23 +16,6 @@ export const typeDefs = gql`
 		ADMIN
 	}
 
-	enum AuditLogAction {
-		READ
-		UPDATE
-		CREATE
-		DELETE
-		LOGIN
-		LOGOUT
-	}
-
-	enum AuditLogTarget {
-		COMPANY
-		USER
-		TEAM
-		TASK_LIST
-		TASK
-	}
-
 	scalar Date
 	scalar DateTime
 
@@ -89,15 +72,14 @@ export const typeDefs = gql`
 		hoursEstimate: Int
 		createdAt: DateTime!
 	}
-	
+
 	type AuditLog {
 		auditLogId: ID!
 		userId: ID!
 		user: User!
 		companyId: ID!
 		company: Company!
-		action: AuditLogAction!
-		target: AuditLogTarget!
+		action: String!
 		sourceIp: String!
 		timestamp: DateTime!
 	}
@@ -106,7 +88,7 @@ export const typeDefs = gql`
 		user(userId: ID!): User!
 		userTaskLists(userId: ID!): [TaskList]!
 		teamTaskLists(teamId: ID!): [TaskList]!
-		auditLog(): AuditLog!
+		auditLog: [AuditLog!]!
 	}
 
 	type Mutation {

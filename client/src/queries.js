@@ -42,3 +42,23 @@ export const GET_USER = gql`
 		}
 	}
 `
+
+export const GET_AUDIT_LOG = gql`
+	query AuditLog {
+		auditLog {
+			auditLogId
+			action
+			sourceIp
+			timestamp
+			company {
+				companyId
+				name
+			}
+			user {
+				userId
+				firstName
+				lastName
+			}
+		}
+	}
+`

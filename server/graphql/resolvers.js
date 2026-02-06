@@ -3,10 +3,12 @@ import { dateScalar } from './customScalars.js'
 import { getUserTaskLists, getTeamTaskLists } from '../taskList.js'
 import { getUser } from '../user.js'
 import { createTask, updateTask, deleteTask } from '../task.js'
+import { getAuditLog } from '../auditLog.js'
 import { updateTeam } from '../team.js'
 import { login } from '../login.js'
 import { forbidden } from '../error.js'
 import { DateTimeResolver } from 'graphql-scalars'
+import { subject } from '@casl/ability'
 
 //TODO: add validation - what happens when invalid arguments are passed in (eg. arg ids not found)
 const Query = {
@@ -29,10 +31,13 @@ const Query = {
 		return getTeamTaskLists(companyId, teamId, userId, context.ability)
 	},
 	auditLog: async (parent, args, context) => {
+		const { companyId, userId } = context.userData
+
 		const ability = context.ability
-		if (!ability.can('read', 'AuditLog')) {
+		if (!ability.can('read', subject('AuditLog', { companyId }))) {
 			forbidden()
 		}
+		return getAuditLog(companyId, ability)
 	}
 }
 

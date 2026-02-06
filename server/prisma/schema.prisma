@@ -89,8 +89,7 @@ model AuditLog {
   companyId  Int
   user       User           @relation(fields: [userId], references: [userId])
   userId     Int
-  action     AuditLogAction
-  target     AuditLogTarget
+  action     String
   sourceIp   String
   timestamp  DateTime       @default(now())
 
@@ -110,21 +109,4 @@ enum UserRole {
   MANAGER
   COMPANY_ADMIN
   ADMIN
-}
-
-enum AuditLogAction {
-  READ
-  UPDATE
-  CREATE
-  DELETE
-  LOGIN
-  LOGOUT
-}
-
-enum AuditLogTarget {
-  COMPANY
-  USER
-  TEAM
-  TASK_LIST
-  TASK
 }
