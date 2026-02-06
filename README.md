@@ -1,7 +1,7 @@
 # standup-tracker
 Stand-up Tracker is a tool for developers to keep track of what they work on every day to make it easier for them for reporting during daily stand-ups.  It also allows managers the ability to view the daily tasks for their teams.
 
-## How to run
+## How to run app
 
 - docker compose up --build
 - Open browser and navigate to http://localhost:3000
@@ -26,6 +26,13 @@ Stand-up Tracker is a tool for developers to keep track of what they work on eve
     - password: andy
     - role: COMPANY_ADMIN
     - team: Company Admins
+
+## How to run tests
+- docker compose up --build
+- cd server
+- npm run test
+
+***Note that tests will only run reliably against a freshly-seeded database***
 
 ## Data Model
 

@@ -14,7 +14,7 @@ export async function login(email, password) {
 
 	const valid = await bcrypt.compare(password, user.password)
 	if (!valid) {
-		throw new Error('invalid user/password')
+		unauthorized()
 	}
 	//generate jwt and return
 	const JWT_SECRET = process.env.JWT_SECRET

@@ -35,7 +35,6 @@ app.use(
 			const token = req.headers.authorization || ''
 
 			if (!token) {
-				console.log('did not find token')
 				return res.status(403).json({ message: 'No token provided' })
 			}
 
