@@ -2,13 +2,16 @@ import { prisma } from '../prisma/database.js'
 import bcrypt from 'bcryptjs'
 import { getUserByEmail } from './user.js'
 import jwt from 'jsonwebtoken'
+import { unauthorized } from '../error.js'
 
 //look up user, compare password and return JWT if success
 //no authorization check here since we don't have user context yet
-//TODO: validate user
-//TODO: error handling
 export async function login(email, password) {
 	const user = await getUserByEmail(email)
+	if (!user) {
+		unauthorized()
+	}
+
 	const valid = await bcrypt.compare(password, user.password)
 	if (!valid) {
 		throw new Error('invalid user/password')

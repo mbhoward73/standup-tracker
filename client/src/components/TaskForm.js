@@ -37,9 +37,7 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 		private: currentData.private,
 		hoursEstimate: currentData.hoursEstimate || undefined
 	})
-	// console.log(
-	// 	`initializing task with title ${currentData.title} and createdAt ${currentData.createdAt}`
-	// )
+
 	const { ability } = useAuth()
 
 	const saveTimeout = useRef(null)
@@ -144,6 +142,10 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 						margin="none"
 						value={formData.hoursEstimate}
 						onChange={handleChange('hoursEstimate')}
+						disabled={isTaskReadOnly()}
+						inputProps={{
+							readOnly: isTaskReadOnly()
+						}}
 					/>
 				</Box>
 			)
@@ -167,6 +169,10 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 						<Checkbox
 							checked={formData.private}
 							onChange={handleChange('private')}
+							disabled={isTaskReadOnly()}
+							inputProps={{
+								readOnly: isTaskReadOnly()
+							}}
 						/>
 					}
 					label="Private"
@@ -175,6 +181,13 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 		} else {
 			return ''
 		}
+	}
+
+	function isTaskReadOnly() {
+		return !ability.can(
+			'update',
+			subject('Task', getCurrentDataClone(currentData))
+		)
 	}
 
 	function getDeleteButtonRender() {
@@ -208,6 +221,10 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 					margin="none"
 					value={formData.title}
 					onChange={handleChange('title')}
+					disabled={isTaskReadOnly()}
+					inputProps={{
+						readOnly: isTaskReadOnly()
+					}}
 				/>
 			</Box>
 
@@ -220,7 +237,11 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 						id="status"
 						value={formData.status}
 						label="Status"
-						onChange={handleChange('status')}>
+						onChange={handleChange('status')}
+						disabled={isTaskReadOnly()}
+						inputProps={{
+							readOnly: isTaskReadOnly()
+						}}>
 						{TASK_STATUS_KEYS.map(taskStatusKey => {
 							const taskStatusLabel = taskStatusKey
 								.replaceAll('_', ' ')
@@ -246,6 +267,10 @@ const TaskForm = ({ currentData, onDataRefresh }) => {
 					margin="none"
 					value={formData.notes}
 					onChange={handleChange('notes')}
+					disabled={isTaskReadOnly()}
+					inputProps={{
+						readOnly: isTaskReadOnly()
+					}}
 				/>
 			</Box>
 

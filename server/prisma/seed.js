@@ -107,7 +107,8 @@ async function seedDatabase() {
 }
 
 async function createTaskLists(user) {
-	const currentDate = new Date('2026-02-04')
+	const currentDate = new Date()
+	currentDate.setDate(currentDate.getDate() - 2)
 
 	await peach([...Array(10).keys()], async i => {
 		await prisma.taskList.create({

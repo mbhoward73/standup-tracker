@@ -1,8 +1,13 @@
 import { prisma } from '../prisma/database.js'
 import { forbidden } from '../error.js'
 import { accessibleBy } from '@casl/prisma'
+import { subject } from '@casl/ability'
 
 export async function getAuditLog(companyId, ability) {
+	if (!ability.can('read', subject('AuditLog', { companyId }))) {
+		forbidden()
+	}
+
 	return prisma.auditLog.findMany({
 		where: {
 			AND: [

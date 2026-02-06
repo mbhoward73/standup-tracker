@@ -72,6 +72,7 @@ Stand-up Tracker is a tool for developers to keep track of what they work on eve
   - just a short-cut due to time constraints but client needs to fetch these permissions from server upon login
 - checked in secrets to github
   - obviously wrong but I'm just trying to remove any extra steps needed to bring up the app
+  - also hard-coded db_password in docker compose
 - using HTTP instead of HTTPS
   - obviously not great when logging in and sending plain text password to server
 - data model has various unnecessary relations
@@ -79,6 +80,8 @@ Stand-up Tracker is a tool for developers to keep track of what they work on eve
 - various operations use arguments from context instead of supporting passed in arguments to operation
   - eg. auditLog takes no arguments and just returns the audit log for the company which the calling user is affiliated with
   - this cuts down on argument bloat in the various operations but might need to be revisited when we add support for ADMIN user who will need the ability to make different queries for different companies
+- tests can only be run after a db seed
+  - just a shortcut
 
 ## TODO
 
@@ -97,12 +100,15 @@ Stand-up Tracker is a tool for developers to keep track of what they work on eve
 - revisit unnecessary relations on all tables
   -  also look at relation return blocks in prisma queries
 - add dataloader to graphql on the server side to ensure that we only fetch a given resource once for a particular request
-- configure Apollo in memory cache on client side
+- configure Apollo in-memory cache on client side
 - configure eslint
 - switch to vite bundler and set up client dist build
 - implement a color theme in webapp
 - add some icons (eg. trash can for delete buttons, nav bar items)
 - shorten JWT token expiration time and set up refresh tokens
+- each test should start with clean database, build up all of the data it needs to run the test, execute the test and then clean out the database
+- add spinner on UI for all loading operations
+- make UI responsive to all sizes
 
 
 ## Future Enhancements

@@ -5,6 +5,12 @@ import { accessibleBy } from '@casl/prisma'
 import { subject } from '@casl/ability'
 
 export async function getUser(companyId, userId, ability) {
+	if (
+		!ability.can('read', subject('User', { companyId, userId }))
+	) {
+		forbidden()
+	}
+
 	const user = await fetchUser(userId, ability)
 	if (!user) {
 		notFound('User not found')

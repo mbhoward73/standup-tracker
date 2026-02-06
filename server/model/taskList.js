@@ -9,7 +9,7 @@ import peach from 'p-each-series'
 import pmap from 'p-map'
 import flatten from 'lodash.flatten'
 import { accessibleBy } from '@casl/prisma'
-import { forbidden } from '../error.js'
+import { forbidden, unauthorized } from '../error.js'
 import { permittedFieldsOf } from '@casl/ability/extra'
 import pick from 'lodash.pick'
 import isEmpty from 'lodash.isempty'
@@ -17,6 +17,12 @@ import { subject } from '@casl/ability'
 
 //find user task lists for yesterday/today/tomorrow and create new task lists if any are missing
 export async function getUserTaskLists(companyId, userId, teamId, ability) {
+	if (
+		!ability.can('read', subject('TaskList', { companyId, userId, teamId }))
+	) {
+		forbidden()
+	}
+
 	const taskLists = await fetchUserTaskLists(userId, ability)
 	if (taskLists.length === 3) {
 		return taskLists
@@ -45,7 +51,16 @@ export async function getUserTaskLists(companyId, userId, teamId, ability) {
 }
 
 export async function getTeamTaskLists(companyId, teamId, managerId, ability) {
-	const team = await getTeam(teamId, ability)
+	if (
+		!ability.can(
+			'read',
+			subject('TaskList', { companyId, userId: managerId, teamId })
+		)
+	) {
+		forbidden()
+	}
+
+	const team = await getTeam(teamId, companyId, ability)
 	const taskLists = await pmap(team.members, user =>
 		getUserTaskLists(companyId, user.userId, teamId, ability)
 	)

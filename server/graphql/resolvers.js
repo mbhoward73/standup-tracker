@@ -10,7 +10,8 @@ import { forbidden } from '../error.js'
 import { DateTimeResolver } from 'graphql-scalars'
 import { subject } from '@casl/ability'
 
-//TODO: add validation - what happens when invalid arguments are passed in (eg. arg ids not found)
+//all authorization checks are inside model files so we don't need to duplicate
+//authorization code if we add another entry point in the future
 const Query = {
 	user: async (parent, args, context) => {
 		const { companyId } = context.userData
@@ -25,9 +26,6 @@ const Query = {
 	teamTaskLists: async (parent, args, context) => {
 		const { companyId, userId, role } = context.userData
 		const teamId = parseInt(args.teamId)
-		if (!ability.can('update', 'Team')) {
-			forbidden()
-		}
 		return getTeamTaskLists(companyId, teamId, userId, context.ability)
 	},
 	auditLog: async (parent, args, context) => {
@@ -62,6 +60,8 @@ const Mutation = {
 	},
 	updateTeam: (parent, args, context) => {
 		const ability = context.ability
+		//this is unnecessary since additional auth checks are in model
+		//but just including one example of how we can enforce auth at mutation level
 		if (!ability.can('update', 'Team')) {
 			forbidden()
 		}
