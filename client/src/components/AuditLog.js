@@ -11,12 +11,6 @@ import {
 import { GET_AUDIT_LOG } from '../queries'
 import { useQuery } from '@apollo/client/react'
 
-const rows = [
-	{ id: 1, name: 'Alice Johnson', email: 'alice@example.com' },
-	{ id: 2, name: 'Bob Smith', email: 'bob@example.com' },
-	{ id: 3, name: 'Carol Davis', email: 'carol@example.com' }
-]
-
 const AuditLog = () => {
 	const { loading, error, data } = useQuery(GET_AUDIT_LOG)
 
